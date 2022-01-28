@@ -9,6 +9,7 @@ task("mint", "Mints from the NFT contract")
     const contract =  await getContract("NFT", hre);
     const transactionResponse = await contract.mintTo(taskArguments.address, {
         gasLimit:500_000,
+        value:8000000000000000
     });
     console.log(`Transacton Hash: ${transactionResponse.hash}`);
 });
