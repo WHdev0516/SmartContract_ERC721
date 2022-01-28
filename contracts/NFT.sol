@@ -4,8 +4,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/security/PullPayment.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract NFT is ERC721, PullPayment {
+contract NFT is ERC721, PullPayment, Ownable {
     using Counters for Counters.Counter;
 
     // Constants. Define total supply.
@@ -41,8 +42,13 @@ contract NFT is ERC721, PullPayment {
     }
 
     // @dev Sets the base token URI prefix
-    function setBaseTokenURI(string memory _baseTokenURI) public {
+    function setBaseTokenURI(string memory _baseTokenURI) public onlyOwner {
         baseTokenURI = _baseTokenURI;
+    }
+
+    // @dev Overridden in order to make it an onlyOwner function
+    function withdrawPayments(address payable payee) public override onlyOwner virtual {
+        super.withdrawPayments(payee);
     }
 
 }
