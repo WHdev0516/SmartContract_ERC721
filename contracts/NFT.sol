@@ -6,6 +6,10 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract NFT is ERC721 {
     using Counters for Counters.Counter;
+
+    // Constants. Define total supply.
+    uint256 public constant TOTAL_SUPPLY =10_000;
+
     Counters.Counter private currentTokenId;
 
     // @dev bse token URI used as a prefix by tokenURI()
@@ -19,6 +23,9 @@ contract NFT is ERC721 {
         public
         returns (uint256)
     {
+        uint256 tokenId =  currentTokenId.current();
+        require(tokenId < TOTAL_SUPPLY, "Max supply reached");
+        
         currentTokenId.increment();
         uint256 newItemId = currentTokenId.current();
         _safeMint(recipient, newItemId);
