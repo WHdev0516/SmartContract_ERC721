@@ -38,3 +38,14 @@ task("token-uri","Fetches the token metadata for the given token ID")
     const metadata =  await fetch(metadata_url).then(res => res.json());
     console.log(`Metadata fetch response: ${JSON.stringify(metadata, null, 2)}`)
 })
+
+task("withdraw", "Withdraw from the NFT contract")
+.addParam("address", "The address to withdraw")
+.setAction(async function (taskArguments, hre) {
+    console.log(taskArguments);
+    const contract =  await getContract("NFT", hre);
+    const transactionResponse = await contract.withdrawPayments(taskArguments.address, {
+        gasLimit:500_000,
+    });
+    console.log(`Transacton Hash: ${transactionResponse.hash}`);
+});
