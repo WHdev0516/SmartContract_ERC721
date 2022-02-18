@@ -399,9 +399,6 @@ contract NFT is ERC721Enumerable, PullPayment, Ownable {
     using Counters for Counters.Counter;
     uint public tempcounter = 0 ;
 
-    // Constants. Define total supply.
-    uint256 public constant TOTAL_SUPPLY =100;
-
     // The mint user info structure
     struct MintUserDetail {
         address mintuser;
@@ -413,7 +410,6 @@ contract NFT is ERC721Enumerable, PullPayment, Ownable {
     MintUserDetail[]  public  mintuserlist;
 
     // Constants. Define MINT price.
-    uint256 public constant MINT_PRICE = 0.008 ether;
 
     Counters.Counter private currentTokenId;
 
@@ -424,14 +420,11 @@ contract NFT is ERC721Enumerable, PullPayment, Ownable {
         baseTokenURI = "";
     }
     
-    function mintTo(address recipient) public payable returns (uint256)
+    function mintTo(address recipient, uint256 tokenid) public payable returns (uint256)
     {
-        uint256 tokenId =  currentTokenId.current();
-        require(tokenId < TOTAL_SUPPLY, "Max supply reached");
-        require(msg.value == MINT_PRICE, "Transaction value did not equal the mint price");
         currentTokenId.increment();
         uint256 newItemId = currentTokenId.current();
-        _safeMint(recipient, newItemId);
+        _safeMint(recipient, tokenid);
         return newItemId;
     }
 
