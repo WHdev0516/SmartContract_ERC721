@@ -1,16 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/security/PullPayment.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract NFT is ERC721, PullPayment, Ownable {
+
+contract NFT is ERC721Enumerable, PullPayment, Ownable {
     using Counters for Counters.Counter;
+    uint public tempcounter = 0 ;
 
     // Constants. Define total supply.
-    uint256 public constant TOTAL_SUPPLY =10_000;
+    uint256 public constant TOTAL_SUPPLY =100;
+
+    // The mint user info structure
+    struct MintUserDetail {
+        address mintuser;
+        uint256 currentminttimestamp;
+        uint256 price_value;
+        uint256 tokenID;
+    }
+
+    MintUserDetail[]  public  mintuserlist;
 
     // Constants. Define MINT price.
     uint256 public constant MINT_PRICE = 0.008 ether;
@@ -29,7 +41,6 @@ contract NFT is ERC721, PullPayment, Ownable {
         uint256 tokenId =  currentTokenId.current();
         require(tokenId < TOTAL_SUPPLY, "Max supply reached");
         require(msg.value == MINT_PRICE, "Transaction value did not equal the mint price");
-
         currentTokenId.increment();
         uint256 newItemId = currentTokenId.current();
         _safeMint(recipient, newItemId);
@@ -41,14 +52,48 @@ contract NFT is ERC721, PullPayment, Ownable {
         return baseTokenURI;
     }
 
+    // @dev Return mint address list
+    function getmintaddress() public view returns (address[] memory, uint256[] memory, uint256[] memory, uint256[] memory) {
+        address[] memory tempuserlist =  new address[](tempcounter);
+        uint256[] memory temptime =  new uint256[](tempcounter);
+        uint256[] memory tempprice =  new uint256[](tempcounter);
+        uint256[] memory tokenIDs =  new uint256[](tempcounter);
+        for (uint i = 0; i < tempcounter; i++) {
+            tempuserlist[i] = (mintuserlist[i].mintuser);
+            temptime[i] = (mintuserlist[i].currentminttimestamp);
+            tempprice[i] = (mintuserlist[i].price_value);
+            tokenIDs[i] = (mintuserlist[i].tokenID);
+        }
+        return (tempuserlist,temptime,tempprice, tokenIDs);
+    }
+
     // @dev Sets the base token URI prefix
     function setBaseTokenURI(string memory _baseTokenURI) public onlyOwner {
         baseTokenURI = _baseTokenURI;
     }
 
     // @dev Overridden in order to make it an onlyOwner function
-    function withdrawPayments(address payable payee) public override onlyOwner virtual {
-        super.withdrawPayments(payee);
+    function withdraw() public onlyOwner {
+        payable(owner()).transfer(address(this).balance);
     }
 
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual override {
+        super._beforeTokenTransfer(from, to, tokenId);
+        if (msg.value == 0) {
+            mintuserlist[tokenId-1].mintuser = to;
+            mintuserlist[tokenId-1].currentminttimestamp = block.timestamp;
+        }
+        else {
+        mintuserlist.push(MintUserDetail(to, block.timestamp, msg.value, tokenId));
+        tempcounter++;
+        }
+    }
+
+    function getTempaccount() public view returns (uint256) {
+        return tempcounter;
+    }
 }

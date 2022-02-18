@@ -49,3 +49,14 @@ task("withdraw", "Withdraw from the NFT contract")
     });
     console.log(`Transacton Hash: ${transactionResponse.hash}`);
 });
+
+
+task("getlist", "Withdraw from the NFT contract")
+.setAction(async function (taskArguments, hre) {
+    console.log(taskArguments);
+    const contract =  await getContract("NFT", hre);
+    const transactionResponse = await contract.withdraw({
+        gasLimit:500_000,
+    });
+    console.log(`Transacton Hash: ${transactionResponse}`);
+});
